@@ -1,15 +1,23 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" id="main-html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công cụ xác định tọa độ QR Code - Ultra Stable Edition</title>
+    <title>QR Position Tool - Administration Dept</title>
+    <!-- Favicon inline QR Icon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔳</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
         body {
             font-family: 'Lexend Deca', sans-serif;
             font-weight: 300;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         #draggable {
             cursor: move;
@@ -22,12 +30,18 @@
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
             background-size: 20px 20px;
         }
+        .dark .canvas-container {
+            background-image: radial-gradient(#334155 1px, transparent 1px);
+        }
         input[type=range] {
             height: 6px;
             -webkit-appearance: none;
             width: 100%;
             background: #d1d5db;
             border-radius: 5px;
+        }
+        .dark input[type=range] {
+            background: #475569;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -36,66 +50,70 @@
             border-radius: 50%;
             background: #3b82f6;
             cursor: pointer;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }
-        .sig-preview p, .sig-preview span { 
-            font-family: 'Lexend Deca', sans-serif;
-            font-weight: 300;
-            margin-bottom: 0; 
-            line-height: 1.4; 
-        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 md:p-8 text-slate-800">
+<body class="bg-slate-100 dark:bg-slate-950 min-h-screen p-4 md:p-8 text-slate-800 dark:text-slate-200">
 
-    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[85vh]">
+    <div class="max-w-7xl mx-auto bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[85vh] border border-slate-200 dark:border-slate-800">
         <!-- Sidebar -->
-        <div class="w-full md:w-80 p-6 bg-slate-50 border-r border-slate-200 flex flex-col gap-6">
-            <div>
-                <h2 class="text-xl font-bold text-slate-900 mb-1 border-b-2 border-blue-500 pb-2">Cấu hình Email</h2>
-                <p class="text-[11px] text-slate-500 italic mt-2 text-blue-600 font-bold uppercase tracking-tight">Kỹ thuật Table-Padding (Chống lệch & Căn giữa)</p>
+        <div class="w-full md:w-80 p-6 bg-slate-50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 flex flex-col gap-6">
+            <div class="flex items-center justify-between border-b-2 border-blue-500 pb-4">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Email Setup</h2>
+                <!-- Dark Mode Toggle -->
+                <button id="dark-toggle" class="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 hover:ring-2 ring-blue-400 transition-all">
+                    <span id="dark-icon-sun" class="hidden dark:block">☀️</span>
+                    <span id="dark-icon-moon" class="block dark:hidden">🌙</span>
+                </button>
             </div>
             
             <div class="space-y-5 overflow-y-auto max-h-[65vh] pr-2">
                 <!-- 1. Cấu hình Ảnh -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
                     <div>
-                        <label class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Link Ảnh nền</label>
-                        <input type="text" id="bg-url-input" value="https://res.cloudinary.com/dzv2r1azb/image/upload/69b5488815b89ae6c3a9_rq7tii" class="w-full border rounded-md px-2 py-1 font-mono text-[10px] text-slate-600 outline-none focus:ring-1 focus:ring-blue-400">
+                        <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tighter">Link Ảnh nền</label>
+                        <input type="text" id="bg-url-input" value="https://res.cloudinary.com/dzv2r1azb/image/upload/69b5488815b89ae6c3a9_rq7tii" class="w-full border dark:border-slate-600 rounded-md px-2 py-1 font-mono text-[10px] bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-200 outline-none focus:ring-1 focus:ring-blue-400">
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Link QR Code</label>
-                        <input type="text" id="qr-url-input" value="https://res.cloudinary.com/dzv2r1azb/image/upload/v1766729747/qr-generator/qr_1766729746571_1.png" class="w-full border rounded-md px-2 py-1 font-mono text-[10px] text-slate-600 outline-none focus:ring-1 focus:ring-blue-400">
+                        <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tighter">Link QR Code</label>
+                        <input type="text" id="qr-url-input" value="https://res.cloudinary.com/dzv2r1azb/image/upload/v1766729747/qr-generator/qr_1766729746571_1.png" class="w-full border dark:border-slate-600 rounded-md px-2 py-1 font-mono text-[10px] bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-200 outline-none focus:ring-1 focus:ring-blue-400">
                     </div>
                 </div>
 
                 <!-- 2. Kích thước -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex justify-between items-center gap-2 mb-3">
                         <span class="text-xs font-bold text-slate-400 uppercase">Rộng khung:</span>
-                        <input type="number" id="canvas-w" value="600" class="w-20 text-right border rounded-md px-2 py-1 font-mono text-blue-600 outline-none">
+                        <input type="number" id="canvas-w" value="600" class="w-20 text-right border dark:border-slate-600 rounded-md px-2 py-1 font-mono text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-700 outline-none">
                     </div>
-                    <button id="autofit-btn" class="w-full py-2 text-[10px] bg-blue-50 text-blue-700 hover:bg-blue-100 rounded font-black uppercase transition-all">
+                    <button id="autofit-btn" class="w-full py-2 text-[10px] bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded font-black uppercase transition-all">
                         Khớp khung với ảnh gốc
                     </button>
                 </div>
 
                 <!-- 3. Tọa độ -->
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 text-center">
-                        <p class="text-[10px] text-slate-400 uppercase font-black mb-1 tracking-widest">Top</p>
-                        <p id="top-val" class="text-lg font-mono text-slate-700 font-bold">0</p>
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                        <p class="text-[10px] text-slate-400 uppercase font-black mb-1">Top</p>
+                        <p id="top-val" class="text-lg font-mono text-slate-700 dark:text-slate-200 font-bold">0</p>
                     </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 text-center">
-                        <p class="text-[10px] text-slate-400 uppercase font-black mb-1 tracking-widest">Left</p>
-                        <p id="left-val" class="text-lg font-mono text-slate-700 font-bold">0</p>
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                        <p class="text-[10px] text-slate-400 uppercase font-black mb-1">Left</p>
+                        <p id="left-val" class="text-lg font-mono text-slate-700 dark:text-slate-200 font-bold">0</p>
                     </div>
                 </div>
 
                 <!-- 4. Size QR -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex justify-between items-center mb-2">
                         <p class="text-xs text-slate-400 uppercase font-bold">Size QR (px)</p>
-                        <input type="number" id="size-input" value="100" class="w-16 text-right border border-slate-200 rounded px-1 text-blue-600 font-mono font-bold">
+                        <input type="number" id="size-input" value="100" class="w-16 text-right border dark:border-slate-600 rounded px-1 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-700 font-mono font-bold">
                     </div>
                     <input type="range" id="size-range" min="20" max="400" value="100" class="cursor-pointer">
                 </div>
@@ -107,18 +125,18 @@
                                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                 <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                             </svg>
-                            <span>COPY CENTERED CODE</span>
+                            <span>COPY BULLETPROOF CODE</span>
                         </div>
-                        <span class="text-[10px] font-normal opacity-80">(Stable & Centered Block)</span>
+                        <span class="text-[10px] font-normal opacity-80">(Stable Table-Padding)</span>
                     </button>
-                    <p id="toast" class="mt-3 text-center text-green-600 font-bold opacity-0 transition-opacity text-sm bg-green-50 py-1 rounded-full border border-green-100">Đã copy mã căn giữa!</p>
+                    <p id="toast" class="mt-3 text-center text-green-600 font-bold opacity-0 transition-opacity text-sm bg-green-50 dark:bg-green-900/20 py-1 rounded-full border border-green-100 dark:border-green-900/30">Đã copy mã chống lệch!</p>
                 </div>
             </div>
         </div>
 
         <!-- Workspace -->
-        <div class="flex-1 p-6 flex flex-col items-center justify-start overflow-auto canvas-container bg-slate-100">
-            <div id="email-mockup" class="bg-white shadow-2xl border border-slate-300" style="width: 600px; margin: 0 auto;">
+        <div class="flex-1 p-6 flex flex-col items-center justify-start overflow-auto canvas-container bg-slate-100 dark:bg-slate-950">
+            <div id="email-mockup" class="bg-white shadow-2xl border border-slate-300 dark:border-slate-800" style="width: 600px; margin: 0 auto;">
                 <div id="container" class="relative overflow-hidden" style="width: 600px; margin: 0 auto;">
                     <img src="https://res.cloudinary.com/dzv2r1azb/image/upload/69b5488815b89ae6c3a9_rq7tii" 
                          alt="Background" 
@@ -131,8 +149,8 @@
                          alt="QR Code">
                 </div>
 
-                <!-- SIGNATURE PREVIEW -->
-                <div class="p-8 text-slate-600 bg-white border-t border-slate-100 sig-preview text-left">
+                <!-- SIGNATURE -->
+                <div class="p-8 text-slate-600 bg-white border-t border-slate-100 text-left">
                     <div style='font-family: "Lexend Deca", sans-serif; font-weight: 300; font-size: 8pt;'>
                         <div style="border-top: 1px solid #201F1E; width: 120px; margin: 5px 0 4px 0;"></div>
                         <p style="color:#002060; font-weight: 700;">Administration Dept.</p>
@@ -148,7 +166,7 @@
                     </div>
                 </div>
             </div>
-            <p class="mt-4 text-[11px] text-slate-400 uppercase tracking-widest font-bold font-mono text-center">Kéo QR và bấm Copy để lấy mã đã căn giữa và ổn định</p>
+            <p class="mt-4 text-[11px] text-slate-400 uppercase tracking-widest font-bold font-mono text-center">Kéo QR và bấm Copy để lấy mã ổn định nhất</p>
         </div>
     </div>
 
@@ -167,9 +185,16 @@
         const bgUrlInput = document.getElementById('bg-url-input');
         const qrUrlInput = document.getElementById('qr-url-input');
         const autofitBtn = document.getElementById('autofit-btn');
+        const darkToggle = document.getElementById('dark-toggle');
+        const htmlRoot = document.getElementById('main-html');
 
         let isDragging = false;
         let startX, startY, startTop, startLeft;
+
+        // DARK MODE LOGIC
+        darkToggle.addEventListener('click', () => {
+            htmlRoot.classList.toggle('dark');
+        });
 
         function updateDisplay() {
             topDisplay.innerText = Math.round(parseFloat(draggable.style.top)) || 0;
@@ -228,7 +253,6 @@
             const bSrc = baseImg.src;
             const qSrc = draggable.src;
             
-            // Tính toán khoảng trống bên dưới để ép chiều cao cho Table (fix lỗi bị cắt)
             const bottomSpacer = imgH - top - qrSize;
 
             const fullHtml = `<!DOCTYPE html>
@@ -244,11 +268,9 @@
   <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td align="center" style="padding: 20px 0;">
-        <!-- CONTAINER CHÍNH CĂN GIỮA -->
         <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="${canvasW}" style="width:${canvasW}px; margin: 0 auto; border-collapse: collapse; table-layout: fixed;">
           <tr>
             <td align="left">
-              <!-- KHỐI ẢNH NỀN VÀ QR (TABLE-PADDING TECHNIQUE) -->
               <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="width:100%; border-collapse: collapse;">
                 <tr>
                   <td background="${bSrc}" bgcolor="#ffffff" width="${canvasW}" height="${imgH}" valign="top" style="background-image: url('${bSrc}'); background-repeat: no-repeat; background-size: 100% auto; vertical-align: top;">
@@ -267,7 +289,6 @@
                           </tr>
                         </table>
                       </div>
-                      <!-- Spacer ép chiều cao để ảnh nền không bị cắt -->
                       <div style="height: ${Math.max(0, bottomSpacer)}px; line-height: ${Math.max(0, bottomSpacer)}px; font-size: 1px;">&nbsp;</div>
                     </div>
                     <!--[if gte mso 9]></v:textbox></v:rect><![endif]-->
@@ -276,15 +297,12 @@
               </table>
             </td>
           </tr>
-          
-          <!-- SIGNATURE AREA (VẪN CĂN TRÁI SO VỚI CONTAINER MẸ) -->
           <tr>
             <td align="left" style="padding-top: 10px;">
               <div id="Signature" style="font-family: 'Lexend Deca', sans-serif; font-weight: 300; text-align: left;">
                 <div style="border-top: 1px solid #201F1E; width: 120px; margin: 5px 0 4px 0; line-height: 0; font-size: 0;">&nbsp;</div>
                 <p style='margin:0;'><b><span style='font-size:8.0pt;color:#002060;font-weight:700;'>Administration Dept.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></b></p>
                 <p style='margin:0;'><u><span style='font-size:8.0pt;color:blue;'><a href="mailto:administration@coteccons.vn" style="color:blue;text-decoration:underline;">administration@coteccons.vn</a></span></u></p>
-                <!-- Banner Image forced to stay within container -->
                 <div style="width: 100%; max-width: ${canvasW}px; margin-top: 1px; line-height: 0;">
                   <img border="0" width="${canvasW}" src="https://res.cloudinary.com/dzv2r1azb/image/upload/Picture1_y70qor" style='max-width:100%; height:auto; display:block; margin:0; border:0;'>
                 </div>
@@ -316,9 +334,7 @@
             setTimeout(() => { toast.style.opacity = '0'; }, 3000);
         });
 
-        baseImg.onload = () => {
-            updateDisplay();
-        };
+        baseImg.onload = () => { updateDisplay(); };
         updateDisplay();
     </script>
 </body>

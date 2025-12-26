@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác định vị trí QR Code</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #draggable {
+            cursor: move;
+            user-select: none;
+            border: 2px dashed transparent;
+            transition: border-color 0.2s;
+        }
+        #draggable:active {
+            border-color: #3b82f6;
+        }
+        .canvas-container {
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        /* Custom slider style */
+        input[type=range] {
+            height: 6px;
+            -webkit-appearance: none;
+            width: 100%;
+            background: #d1d5db;
+            border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8 font-sans">
+
+    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+        <!-- Sidebar Controls -->
+        <div class="w-full md:w-80 p-6 bg-gray-50 border-r border-gray-200">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Thông số QR</h2>
+            
+            <div class="space-y-4">
+                <!-- Tọa độ -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Top (px)</p>
+                        <p id="top-val" class="text-xl font-mono text-blue-600">640</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Left (px)</p>
+                        <p id="left-val" class="text-xl font-mono text-blue-600">440</p>
+                    </div>
+                </div>
+
+                <!-- Kích thước -->
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-sm text-gray-500 uppercase font-semibold">Kích thước (px)</p>
+                        <input type="number" id="size-input" value="100" class="w-16 text-right border border-gray-200 rounded px-1 text-blue-600 font-mono">
+                    </div>
+                    <input type="range" id="size-range" min="20" max="400" value="100" class="w-full">
+                </div>
+
+                <div class="pt-4">
+                    <button id="copy-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                            <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                        </svg>
+                        Sao chép mã nhúng
+                    </button>
+                    <p id="toast" class="mt-2 text-center text-green-600 font-medium opacity-0 transition-opacity text-sm">Đã sao chép code vào bộ nhớ!</p>
+                </div>
+
+                <div class="mt-8 text-xs text-gray-400 leading-relaxed bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <p class="font-bold text-blue-800 mb-1 uppercase">Mẹo:</p>
+                    <p>• <b>Kéo thả:</b> Di chuyển QR.</p>
+                    <p>• <b>Mũi tên:</b> Nhích 1px (giữ Shift để nhích 10px).</p>
+                    <p>• <b>Phím +/-:</b> Tăng/giảm kích thước.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="flex-1 p-4 md:p-8 flex flex-col items-center justify-start overflow-auto canvas-container">
+            <div id="container" class="relative bg-white shadow-2xl" style="width: 600px; height: 800px;">
+                <!-- Base Image -->
+                <img src="https://res.cloudinary.com/dzv2r1azb/image/upload/69b5488815b89ae6c3a9_rq7tii" 
+                     alt="Base" 
+                     class="w-full h-auto pointer-events-none block"
+                     onerror="this.src='https://via.placeholder.com/600x800?text=Base+Image+Error'">
+                
+                <!-- Draggable QR -->
+                <img id="draggable" 
+                     src="https://res.cloudinary.com/dzv2r1azb/image/upload/v1766729747/qr-generator/qr_1766729746571_1.png" 
+                     style="position:absolute; top: 640px; left: 440px; width: 100px; height: 100px;"
+                     alt="QR Code"
+                     onerror="this.src='https://via.placeholder.com/100x100?text=QR+Code'">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const draggable = document.getElementById('draggable');
+        const container = document.getElementById('container');
+        const topDisplay = document.getElementById('top-val');
+        const leftDisplay = document.getElementById('left-val');
+        const copyBtn = document.getElementById('copy-btn');
+        const toast = document.getElementById('toast');
+        const sizeInput = document.getElementById('size-input');
+        const sizeRange = document.getElementById('size-range');
+
+        let isDragging = false;
+        let startX, startY;
+        let startTop, startLeft;
+
+        // Cập nhật text hiển thị và style
+        function updateDisplay() {
+            const top = parseInt(draggable.style.top);
+            const left = parseInt(draggable.style.left);
+            topDisplay.innerText = top;
+            leftDisplay.innerText = left;
+        }
+
+        function updateSize(newSize) {
+            newSize = Math.max(10, Math.min(600, newSize));
+            draggable.style.width = newSize + 'px';
+            draggable.style.height = newSize + 'px'; // Giữ tỉ lệ vuông
+            sizeInput.value = newSize;
+            sizeRange.value = newSize;
+        }
+
+        // Sự kiện Kích thước
+        sizeRange.addEventListener('input', (e) => updateSize(e.target.value));
+        sizeInput.addEventListener('change', (e) => updateSize(e.target.value));
+
+        // Logic kéo thả (Mouse)
+        draggable.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startTop = parseInt(draggable.style.top) || 0;
+            startLeft = parseInt(draggable.style.left) || 0;
+            e.preventDefault();
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            draggable.style.top = (startTop + dy) + 'px';
+            draggable.style.left = (startLeft + dx) + 'px';
+            updateDisplay();
+        });
+
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        // Hỗ trợ cảm ứng (Touch)
+        draggable.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            startTop = parseInt(draggable.style.top) || 0;
+            startLeft = parseInt(draggable.style.left) || 0;
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+            draggable.style.top = (startTop + dy) + 'px';
+            draggable.style.left = (startLeft + dx) + 'px';
+            updateDisplay();
+        }, { passive: false });
+
+        window.addEventListener('touchend', () => isDragging = false);
+
+        // Điều khiển bằng bàn phím
+        window.addEventListener('keydown', (e) => {
+            let top = parseInt(draggable.style.top);
+            let left = parseInt(draggable.style.left);
+            let size = parseInt(sizeInput.value);
+            const step = e.shiftKey ? 10 : 1;
+            
+            if (e.key === 'ArrowUp') draggable.style.top = (top - step) + 'px';
+            if (e.key === 'ArrowDown') draggable.style.top = (top + step) + 'px';
+            if (e.key === 'ArrowLeft') draggable.style.left = (left - step) + 'px';
+            if (e.key === 'ArrowRight') draggable.style.left = (left + step) + 'px';
+            
+            // Thay đổi kích thước bằng phím +/-
+            if (e.key === '=' || e.key === '+') updateSize(size + step);
+            if (e.key === '-' || e.key === '_') updateSize(size - step);
+            
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', '+', '-', '=', '_'].includes(e.key)) {
+                e.preventDefault();
+                updateDisplay();
+            }
+        });
+
+        // Sao chép kết quả
+        copyBtn.addEventListener('click', () => {
+            const finalTop = draggable.style.top;
+            const finalLeft = draggable.style.left;
+            const finalWidth = draggable.style.width;
+            
+            const htmlSnippet = `<img src="${draggable.src}" style="position:absolute; top:${finalTop}; left:${finalLeft}; width:${finalWidth}; height:auto;">`;
+            
+            const el = document.createElement('textarea');
+            el.value = htmlSnippet;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
+        });
+
+        // Khởi tạo ban đầu
+        updateDisplay();
+    </script>
+</body>
+</html>

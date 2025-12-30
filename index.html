@@ -57,6 +57,11 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        .header-text-preview {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 min-h-screen p-4 md:p-8 text-slate-800 dark:text-slate-200">
@@ -66,27 +71,38 @@
         <div class="w-full md:w-80 p-6 bg-slate-50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 flex flex-col gap-6">
             <div class="flex items-center justify-between border-b-2 border-blue-500 pb-4">
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white">Email Setup</h2>
-                <!-- Dark Mode Toggle -->
                 <button id="dark-toggle" class="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 hover:ring-2 ring-blue-400 transition-all">
                     <span id="dark-icon-sun" class="hidden dark:block">☀️</span>
                     <span id="dark-icon-moon" class="block dark:hidden">🌙</span>
                 </button>
             </div>
             
-            <div class="space-y-5 overflow-y-auto max-h-[65vh] pr-2">
-                <!-- 1. Cấu hình Ảnh -->
+            <div class="space-y-5 overflow-y-auto max-h-[70vh] pr-2">
+                <!-- Nội dung lời chào -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+                    <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Lời chào trên cùng</p>
+                    <textarea id="header-text-input" rows="6" class="w-full border dark:border-slate-600 rounded-md px-2 py-2 font-light text-[11px] bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-200 outline-none focus:ring-1 focus:ring-blue-400 leading-relaxed">Chào anh/chi,
+YEP là để vui, mà muốn vui thì bụng phải khỏe! 
+Để tránh những tình huống "dở khóc dở cười" vì dị ứng, mời anh/chi click ngay vào link này:
+👉 [Link: Click nhẹ một giây – Tiệc vui hết sảy]
+
+BTC sẽ dựa vào đây để thiết kế thực đơn "vừa vặn" nhất cho bạn. 
+Đừng quên "trình" thư mời bên dưới để check-in thật mượt mà nha!</textarea>
+                </div>
+
+                <!-- Cấu hình Ảnh -->
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
                     <div>
                         <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tighter">Link Ảnh nền</label>
-                        <input type="text" id="bg-url-input" value="https://res.cloudinary.com/dzv2r1azb/image/upload/69b5488815b89ae6c3a9_rq7tii" class="w-full border dark:border-slate-600 rounded-md px-2 py-1 font-mono text-[10px] bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-200 outline-none focus:ring-1 focus:ring-blue-400">
+                        <input type="text" id="bg-url-input" value="https://res.cloudinary.com/dzv2r1azb/image/upload/69b5488815b89ae6c3a9_rq7tii" class="w-full border dark:border-slate-600 rounded-md px-2 py-1 font-mono text-[10px] bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-200 outline-none">
                     </div>
                     <div>
                         <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tighter">Link QR Code</label>
-                        <input type="text" id="qr-url-input" value="https://res.cloudinary.com/dzv2r1azb/image/upload/v1766729747/qr-generator/qr_1766729746571_1.png" class="w-full border dark:border-slate-600 rounded-md px-2 py-1 font-mono text-[10px] bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-200 outline-none focus:ring-1 focus:ring-blue-400">
+                        <input type="text" id="qr-url-input" value="https://res.cloudinary.com/dzv2r1azb/image/upload/v1766729747/qr-generator/qr_1766729746571_1.png" class="w-full border dark:border-slate-600 rounded-md px-2 py-1 font-mono text-[10px] bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-200 outline-none">
                     </div>
                 </div>
 
-                <!-- 2. Kích thước -->
+                <!-- Kích thước -->
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex justify-between items-center gap-2 mb-3">
                         <span class="text-xs font-bold text-slate-400 uppercase">Rộng khung:</span>
@@ -97,7 +113,7 @@
                     </button>
                 </div>
 
-                <!-- 3. Tọa độ -->
+                <!-- Tọa độ -->
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
                         <p class="text-[10px] text-slate-400 uppercase font-black mb-1">Top</p>
@@ -109,7 +125,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Size QR -->
+                <!-- Size QR -->
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="flex justify-between items-center mb-2">
                         <p class="text-xs text-slate-400 uppercase font-bold">Size QR (px)</p>
@@ -125,11 +141,11 @@
                                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                 <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                             </svg>
-                            <span>COPY BULLETPROOF CODE</span>
+                            <span>COPY FULL TEMPLATE</span>
                         </div>
                         <span class="text-[10px] font-normal opacity-80">(Stable Table-Padding)</span>
                     </button>
-                    <p id="toast" class="mt-3 text-center text-green-600 font-bold opacity-0 transition-opacity text-sm bg-green-50 dark:bg-green-900/20 py-1 rounded-full border border-green-100 dark:border-green-900/30">Đã copy mã chống lệch!</p>
+                    <p id="toast" class="mt-3 text-center text-green-600 font-bold opacity-0 transition-opacity text-sm bg-green-50 dark:bg-green-900/20 py-1 rounded-full border border-green-100 dark:border-green-900/30">Đã copy toàn bộ mã!</p>
                 </div>
             </div>
         </div>
@@ -137,6 +153,12 @@
         <!-- Workspace -->
         <div class="flex-1 p-6 flex flex-col items-center justify-start overflow-auto canvas-container bg-slate-100 dark:bg-slate-950">
             <div id="email-mockup" class="bg-white shadow-2xl border border-slate-300 dark:border-slate-800" style="width: 600px; margin: 0 auto;">
+                <!-- TIÊU ĐỀ/LỜI CHÀO PREVIEW -->
+                <div id="header-text-preview" class="p-8 text-slate-700 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700 header-text-preview text-sm font-light">
+                    <!-- Nội dung JS tự đổ vào đây -->
+                </div>
+
+                <!-- KHỐI ẢNH CHÍNH -->
                 <div id="container" class="relative overflow-hidden" style="width: 600px; margin: 0 auto;">
                     <img src="https://res.cloudinary.com/dzv2r1azb/image/upload/69b5488815b89ae6c3a9_rq7tii" 
                          alt="Background" 
@@ -166,7 +188,7 @@
                     </div>
                 </div>
             </div>
-            <p class="mt-4 text-[11px] text-slate-400 uppercase tracking-widest font-bold font-mono text-center">Kéo QR và bấm Copy để lấy mã ổn định nhất</p>
+            <p class="mt-4 text-[11px] text-slate-400 uppercase tracking-widest font-bold font-mono text-center">Kéo QR và bấm Copy để lấy mã hoàn chỉnh</p>
         </div>
     </div>
 
@@ -174,6 +196,9 @@
         const draggable = document.getElementById('draggable');
         const container = document.getElementById('container');
         const emailMockup = document.getElementById('email-mockup');
+        const headerPreview = document.getElementById('header-text-preview');
+        const headerInput = document.getElementById('header-text-input');
+        
         const topDisplay = document.getElementById('top-val');
         const leftDisplay = document.getElementById('left-val');
         const copyBtn = document.getElementById('copy-btn');
@@ -195,6 +220,12 @@
         darkToggle.addEventListener('click', () => {
             htmlRoot.classList.toggle('dark');
         });
+
+        // HEADER TEXT LOGIC
+        function updateHeaderPreview() {
+            headerPreview.innerText = headerInput.value;
+        }
+        headerInput.addEventListener('input', updateHeaderPreview);
 
         function updateDisplay() {
             topDisplay.innerText = Math.round(parseFloat(draggable.style.top)) || 0;
@@ -255,6 +286,9 @@
             
             const bottomSpacer = imgH - top - qrSize;
 
+            // Xử lý xuống dòng cho header text
+            const headerHtml = headerInput.value.replace(/\n/g, '<br>');
+
             const fullHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -264,11 +298,20 @@
     * { font-family: 'Lexend Deca', sans-serif !important; }
   </style>
 </head>
-<body style="margin:0; padding:0;">
+<body style="margin:0; padding:0; background-color:#f4f4f4;">
   <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td align="center" style="padding: 20px 0;">
-        <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="${canvasW}" style="width:${canvasW}px; margin: 0 auto; border-collapse: collapse; table-layout: fixed;">
+        <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="${canvasW}" style="width:${canvasW}px; margin: 0 auto; border-collapse: collapse; background-color:#ffffff;">
+          
+          <!-- LỜI CHÀO -->
+          <tr>
+            <td align="left" style="padding: 40px; color: #333333; font-size: 14px; font-weight: 300; line-height: 1.6;">
+              ${headerHtml}
+            </td>
+          </tr>
+
+          <!-- KHỐI ẢNH CHÍNH -->
           <tr>
             <td align="left">
               <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="width:100%; border-collapse: collapse;">
@@ -297,8 +340,10 @@
               </table>
             </td>
           </tr>
+
+          <!-- SIGNATURE AREA -->
           <tr>
-            <td align="left" style="padding-top: 10px;">
+            <td align="left" style="padding: 40px; border-top: 1px solid #eeeeee;">
               <div id="Signature" style="font-family: 'Lexend Deca', sans-serif; font-weight: 300; text-align: left;">
                 <div style="border-top: 1px solid #201F1E; width: 120px; margin: 5px 0 4px 0; line-height: 0; font-size: 0;">&nbsp;</div>
                 <p style='margin:0;'><b><span style='font-size:8.0pt;color:#002060;font-weight:700;'>Administration Dept.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></b></p>
@@ -334,7 +379,9 @@
             setTimeout(() => { toast.style.opacity = '0'; }, 3000);
         });
 
+        // Initialize preview
         baseImg.onload = () => { updateDisplay(); };
+        updateHeaderPreview();
         updateDisplay();
     </script>
 </body>
